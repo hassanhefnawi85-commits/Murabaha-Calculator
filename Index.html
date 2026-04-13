@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hefnawi Calc">
+<title>Hefnawi Murabaha Calculator</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#1a1a2e; color:#e0eaff; font-family:'Segoe UI',sans-serif; padding-bottom:40px; }
+.header { background:linear-gradient(135deg,#0f3460,#16213e); border-bottom:3px solid #C9973A; padding:14px 16px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:10; }
+.badge { background:#C9973A; color:#fff; font-weight:800; font-size:13px; padding:6px 10px; border-radius:6px; letter-spacing:1px; white-space:nowrap; }
+.header h1 { color:#E8C070; font-size:17px; font-weight:700; }
+.header p { color:#667799; font-size:11px; margin-top:1px; }
+.card { margin:12px 12px 0; background:#16213e; border-radius:12px; border:1px solid #0f3460; overflow:hidden; }
+.card-head { background:#0f3460; color:#C9973A; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:9px 14px; border-bottom:1px solid #1a3a5c; }
+.card-body { padding:14px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.row3 { display:grid; grid-template-columns:80px 1fr 1fr; gap:8px; margin-bottom:10px; }
+.divider { height:1px; background:#1e3a5f; margin:2px 0 12px; }
+label { display:block; color:#7a99bb; font-size:11px; font-weight:600; margin-bottom:5px; letter-spacing:0.3px; }
+input, select { width:100%; background:#0d1b2e; border:1px solid #2a4a6b; border-radius:7px; color:#e0eaff; font-family:inherit; font-size:15px; padding:10px 12px; outline:none; box-sizing:border-box; -webkit-appearance:none; appearance:none; }
+input:focus, select:focus { border-color:#C9973A; }
+select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9973A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:30px; }
+.grace-row { display:flex; gap:6px; }
+.grace-row input { flex:1; }
+.grace-row select { width:90px; flex:none; }
+.btn-calc { width:100%; padding:14px; border-radius:9px; border:none; background:linear-gradient(135deg,#C9973A,#E8C070); color:#0d1b2e; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer; margin-bottom:8px; }
+.btn-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.btn-sec { padding:11px; border-radius:8px; border:1px solid #2a4a6b; background:#1e3a5f; color:#8899bb; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.error { background:#2e0d0d; border:1px solid #f85149; border-radius:7px; color:#f85149; font-size:13px; padding:9px 12px; margin-bottom:10px; }
+.res-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.res-box { background:#0d1b2e; border:1px solid #1e3a5f; border-radius:8px; padding:10px 12px; }
+.res-box.hi { background:#0a2a0a; border-color:#C9973A; }
+.res-lbl { color:#55668a; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; }
+.res-val { color:#e0eaff; font-size:15px; font-weight:700; }
+.res-box.hi .res-val { color:#4caf50; }
+.footer { color:#334455; font-size:10px; text-align:center; padding:16px 0 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="badge">Hefnawi</div>
+  <div><h1>Murabaha Calculator</h1><p>Personal Finance · Islamic Banking</p></div>
+</div>
+<div class="card">
+  <div class="card-head">⚙ Inputs</div>
+  <div class="card-body">
+    <div class="row2">
+      <div><label>Profit Method</label><select id="method" onchange="onMethodChange()"><option value="flat">Flat %</option><option value="reduced" selected>Reduced %</option><option value="amount">Profit Amount</option></select></div>
+      <div><label id="rateLabel">Reducing Rate (%)</label><input type="text" inputmode="decimal" id="rate" placeholder="5.99"></div>
+    </div>
+    <div class="row2">
+      <div><label>Grace Period</label><div class="grace-row"><input type="text" inputmode="numeric" id="grace" placeholder="0"><select id="graceUnit"><option value="days">Days</option><option value="months">Months</option></select></div></div>
+      <div><label>Value Date</label><input type="date" id="vdate"></div>
+    </div>
+    <div class="row3">
+      <div><label>Inst.</label><input type="text" inputmode="numeric" id="inst" placeholder="48"></div>
+      <div><label>Frequency</label><select id="freq"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></div>
+      <div><label>Good Faith (AED)</label><input type="text" inputmode="decimal" id="goodFaith" placeholder="0.00"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="row2">
+      <div><label>Quotation Amount (AED)</label><input type="text" inputmode="decimal" id="quot" placeholder="500000"></div>
+      <div><label>Expense Amount (AED)</label><input type="text" inputmode="decimal" id="expense" placeholder="0.00"></div>
+    </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label>Down Payment (AED)</label><input type="text" inputmode="decimal" id="downPay" placeholder="0.00"></div>
+      <div><label>Insurance Amount (AED)</label><input type="text" inputmode="decimal" id="insur" placeholder="0.00"></div>
+    </div>
+    <div class="error" id="errBox" style="display:none"></div>
+    <button class="btn-calc" onclick="calculate()">⟳ Calculate</button>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="clearAll()">Clear</button>
+      <button class="btn-sec" onclick="copyResults()">Copy Results</button>
+    </div>
+  </div>
+</div>
+<div class="card" id="resultsCard" style="display:none">
+  <div class="card-head">📊 Results</div>
+  <div class="card-body">
+    <div class="res-grid">
+      <div class="res-box hi"><div class="res-lbl">Finance Amount</div><div class="res-val" id="r_finance">—</div></div>
+      <div class="res-box hi"><div class="res-lbl">Profit Amount</div><div class="res-val" id="r_profit">—</div></div>
+      <div class="res-box"><div class="res-lbl">Installment Amount</div><div class="res-val" id="r_pmt">—</div></div>
+      <div class="res-box"><div class="res-lbl">Total Selling Price</div><div class="res-val" id="r_totalSell">—</div></div>
+      <div class="res-box"><div class="res-lbl">Total Cost Amount</div><div class="res-val" id="r_totalCost">—</div></div>
+      <div class="res-box"><div class="res-lbl">Receivable Amount</div><div class="res-val" id="r_receivable">—</div></div>
+      <div class="res-box"><div class="res-lbl">Flat Rate %</div><div class="res-val" id="r_flat">—</div></div>
+      <div class="res-box"><div class="res-lbl">Reducing Balance Rate %</div><div class="res-val" id="r_red">—</div></div>
+      <div class="res-box"><div class="res-lbl">First Installment Date</div><div class="res-val" id="r_first">—</div></div>
+      <div class="res-box"><div class="res-lbl">Last Installment Date</div><div class="res-val" id="r_last">—</div></div>
+    </div>
+  </div>
+</div>
+<div class="footer">For reference only · Hefnawi Personal Finance Tool</div>
+<script>
+document.getElementById('vdate').value = new Date().toISOString().split('T')[0];
+function onMethodChange(){const m=document.getElementById('method').value;document.getElementById('rateLabel').textContent=m==='flat'?'Flat Rate (%)':m==='reduced'?'Reducing Rate (%)':'Profit Amount (AED)';}
+function fmt(n){if(isNaN(n)||n===null)return'—';return n.toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d)return'—';return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function addMonths(date,m){const d=new Date(date);d.setMonth(d.getMonth()+m);return d;}
+function showErr(msg){const b=document.getElementById('errBox');b.textContent='⚠ '+msg;b.style.display='block';}
+function hideErr(){document.getElementById('errBox').style.display='none';}
+function setResult(id,val){document.getElementById(id).textContent=val;}
+function calculate(){
+hideErr();
+const method=document.getElementById('method').value;
+const R=parseFloat(document.getElementById('rate').value)||0;
+const G=parseFloat(document.getElementById('grace').value)||0;
+const gu=document.getElementById('graceUnit').value;
+const N=parseInt(document.getElementById('inst').value)||0;
+const fr=document.getElementById('freq').value;
+const vd=document.getElementById('vdate').value;
+const Q=parseFloat(document.getElementById('quot').value)||0;
+const EX=parseFloat(document.getElementById('expense').value)||0;
+const DP=parseFloat(document.getElementById('downPay').value)||0;
+const GF=parseFloat(document.getElementById('goodFaith').value)||0;
+const IN=parseFloat(document.getElementById('insur').value)||0;
+if(!Q){showErr('Enter Quotation Amount');return;}
+if(!N){showErr('Enter number of Installments');return;}
+if(!R&&method!=='amount'){showErr('Enter Rate');return;}
+const finance=Q+EX-DP+IN;
+const ppy=fr==='monthly'?12:fr==='quarterly'?4:1;
+const apm=fr==='monthly'?1:fr==='quarterly'?3:12;
+const r=R/100/ppy;
+const DPM=365/12;
+const graceMonths=G>0?(gu==='days'?G/DPM:G):0;
+const graceMonths30=G>0?(gu==='days'?G/30:G):0;
+let profit,pmt,flatRate,redRate;
+if(method==='reduced'){
+redRate=R;
+const bal=finance*Math.pow(1+r,graceMonths30);
+const pmtExact=bal*r/(1-Math.pow(1+r,-N));
+pmt=Math.round(pmtExact*100)/100;
+profit=pmt*N-finance;
+const tenorYears=(N+graceMonths)/12;
+flatRate=(profit/finance/tenorYears)*100;
+}else if(method==='flat'){
+flatRate=R;
+const tenorYears=(N+graceMonths)/12;
+profit=finance*(flatRate/100)*tenorYears;
+pmt=Math.round(((finance+profit)/N)*100)/100;
+profit=pmt*N-finance;
+let rr=flatRate/100/ppy*1.8;
+for(let i=0;i<300;i++){const f=pmt*(1-Math.pow(1+rr,-N))/rr-finance;const df=pmt*((-N*Math.pow(1+rr,-N-1)*rr-(1-Math.pow(1+rr,-N)))/(rr*rr));if(!df)break;const nr=rr-f/df;if(Math.abs(nr-rr)<1e-12){rr=nr;break;}if(nr<=0)break;rr=nr;}
+redRate=rr*ppy*100;
+}else{
+profit=R;pmt=Math.round(((finance+profit)/N)*100)/100;profit=pmt*N-finance;
+const tenorYears=(N+graceMonths)/12;flatRate=(profit/finance/tenorYears)*100;
+let rr=0.005;
+for(let i=0;i<300;i++){const f=pmt*(1-Math.pow(1+rr,-N))/rr-finance;const df=pmt*((-N*Math.pow(1+rr,-N-1)*rr-(1-Math.pow(1+rr,-N)))/(rr*rr));if(!df)break;const nr=rr-f/df;if(Math.abs(nr-rr)<1e-12){rr=nr;break;}if(nr<=0)break;rr=nr;}
+redRate=rr*ppy*100;
+}
+const totalSell=finance+profit;
+const totalCost=Q+EX+IN;
+const receivable=totalSell-GF;
+let firstDate=null,lastDate=null;
+if(vd){const d=new Date(vd);if(gu==='days'&&G>0){firstDate=new Date(d);firstDate.setDate(firstDate.getDate()+Math.round(G));firstDate=addMonths(firstDate,apm);}else if(G>0){firstDate=addMonths(d,Math.round(graceMonths)+apm);}else{firstDate=addMonths(d,apm);}lastDate=addMonths(firstDate,(N-1)*apm);}
+window._results={finance,profit,pmt,totalSell,totalCost,receivable,flatRate,redRate:method==='reduced'?R:redRate,firstDate,lastDate};
+setResult('r_finance',fmt(finance));setResult('r_profit',fmt(profit));setResult('r_pmt',fmt(pmt));
+setResult('r_totalSell',fmt(totalSell));setResult('r_totalCost',fmt(totalCost));setResult('r_receivable',fmt(receivable));
+setResult('r_flat',flatRate.toFixed(4));setResult('r_red',(method==='reduced'?R:redRate).toFixed(4));
+setResult('r_first',fmtDate(firstDate));setResult('r_last',fmtDate(lastDate));
+document.getElementById('resultsCard').style.display='block';
+document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function clearAll(){['rate','grace','inst','quot','expense','downPay','goodFaith','insur'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('vdate').value=new Date().toISOString().split('T')[0];document.getElementById('resultsCard').style.display='none';hideErr();}
+function copyResults(){const r=window._results;if(!r)return;const text=['Finance Amount: '+fmt(r.finance),'Profit Amount: '+fmt(r.profit),'Installment Amount: '+fmt(r.pmt),'Total Selling Price: '+fmt(r.totalSell),'Total Cost Amount: '+fmt(r.totalCost),'Receivable Amount: '+fmt(r.receivable),'Flat Rate %: '+r.flatRate.toFixed(4),'Reducing Balance Rate %: '+r.redRate.toFixed(4),'First Installment Date: '+fmtDate(r.firstDate),'Last Installment Date: '+fmtDate(r.lastDate)].join('\n');navigator.clipboard.writeText(text).then(()=>{const btn=event.target;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='Copy Results',2000);}).catch(()=>alert('Copy failed'));}
+</script>
+</body>
+</html>
